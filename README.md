@@ -13,12 +13,12 @@ Integrating with Travis-CI is very easy! You need to have a Travis-CI account an
 
 To integrate the scripts with the source, open a terminal window and execute:
 
-  $ git branch continuous-integration
-  $ git checkout continuous-integration
-  $ cp -r ../palemoon-helper-scripts/travis-ci/. .
-  $ git add --all .
-  $ uname | grep -Eiq 'msys|mingw' && git update-index --chmod=+x build/travis_ci/travis_ci.sh
-  $ git commit -m "Enable continuous integration."
-  $ git push origin continuous-integration
+	$ git branch continuous-integration
+	$ git checkout continuous-integration
+	$ cp -r ../palemoon-helper-scripts/travis-ci/. .
+	$ git add --all .
+	$ uname | grep -Eiq 'msys|mingw' && git update-index --chmod=+x build/travis_ci/travis_ci.sh
+	$ git commit -m "Enable continuous integration."
+	$ git push origin continuous-integration
 
 These builds (as of the present) will be built on a Ubuntu 12.04 x86-64 VM. On a successful build, these will be uploaded to Zippyshare.
