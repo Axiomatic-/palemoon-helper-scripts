@@ -51,27 +51,7 @@ ac_add_options --x-libraries=/usr/lib
 	make package
 }
 
-upload_build () {
-	set +e
-
-	file="$(readlink -e "$1")"
-
-	if [[ ! -f $file ]] || [[ ! -r $file ]]; then
-		echo "The path is invalid, or the file could not be read."
-		return 0
-	fi
-
-	if ! tmpdir="$(mktemp -d /tmp/upload.XXXXXXXXX)"; then
-		echo "The temporary directory could not be created."
-		return 0
-	fi
-
-	cookiejar="$tmpdir/cookies.txt"
-	useragent="Mozilla/5.0 (Windows NT 6.1; rv: 31.0) Gecko/20100101 Firefox/31.0"
-	homepage_url="http://zippyshare.com/sites/index_old.jsp"
-	homepage_file="$tmpdir/zippyshare.homepage"
-	response_file="$tmpdir/zippyshare.response"
-
+upload_build_zippyshare () {
 	if ! curl -sLfc "$cookiejar" "$homepage_url" -A "$useragent" -o "$homepage_file"; then
 		echo "Failed to retrieve homepage."
 		return 0
@@ -104,6 +84,71 @@ upload_build () {
 	fi
 
 	echo "File uploaded to: $file_url"
+}
+
+upload_build_devhost () {
+	if ! curl -sLf "$homepage_url" -A "$useragent" -o "$homepage_file"; then
+		bail "Failed to retrieve homepage."
+	fi
+
+	upload_url="$(grep -Eo 'http://[a-z0-9.-]+\.d-h\.st/upload\?[A-Za-z0-9_-]+=[A-Za-z0-9]+' "$homepage_file")"
+
+	if ! [[ $upload_url =~ ^http://[a-z0-9.-]+\.d-h\.st/upload\?[A-Za-z0-9_-]+=[A-Za-z0-9]+$ ]]; then
+		bail "The upload destination could not be determined!"
+	fi
+
+	upload_id="$(echo "$upload_url" | grep -Eo '[A-Za-z0-9]+$')"
+
+	if ! [[ $upload_id =~ ^[A-Za-z0-9]+$ ]]; then
+		bail "The upload ID could not be determined!"
+	fi
+
+	if ! curl -sLf -F "UPLOAD_IDENTIFIER=$upload_id" -F "action=upload" -F "uploadfolder=0" -F "public=0" -F "user_id=0" -F "files[]=@$file" -F "file_description=" "$upload_url" -A "$useragent" -o "$response_file"; then
+		bail "Failed to upload file."
+	fi
+
+	file_url="$(grep -Eio 'http:\\/\\/d-h.st\\/[A-Za-z0-9-]+' "$response_file" | tr -d '\\')"
+
+	if ! [[ $file_url =~ ^http://d-h.st/[A-Za-z0-9-]+$ ]]; then
+		bail "The URL to which the file was uploaded could not be determined."
+	fi
+
+	echo "File uploaded to: $file_url"
+}
+
+upload_build () {
+	set +e
+
+	file="$(readlink -e "$2")"
+
+	if [[ ! -f $file ]] || [[ ! -r $file ]]; then
+		echo "The path is invalid, or the file could not be read."
+		return 0
+	fi
+
+	if ! tmpdir="$(mktemp -d /tmp/upload.XXXXXXXXX)"; then
+		echo "The temporary directory could not be created."
+		return 0
+	fi
+
+	cookiejar="$tmpdir/cookies.txt"
+	useragent="Mozilla/5.0 (Windows NT 6.1; rv: 31.0) Gecko/20100101 Firefox/31.0"
+	homepage_file="$tmpdir/zippyshare.homepage"
+	response_file="$tmpdir/zippyshare.response"
+
+	case "$1" in
+		zippyshare)
+			homepage_url="http://zippyshare.com/sites/index_old.jsp"
+			;;
+		devhost)
+			homepage_url="http://d-h.st/"
+			;;
+		*)
+			echo "Upload requested for unknown service, ignoring..."
+			return 0
+	esac
+
+	upload_build_$1 "$file"
 }
 
 cd "$srcdir"
@@ -148,7 +193,7 @@ case "$1" in
 		install_deps
 		;;
 	build)
-		build_palemoon && upload_build "$objdir"/dist/palemoon-*.tar.bz2
+		build_palemoon && upload_build zippyshare "$objdir"/dist/palemoon-*.tar.bz2
 		;;
 	*)
 		echo "Unknown job type: $1"
