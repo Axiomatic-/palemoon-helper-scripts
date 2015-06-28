@@ -84,7 +84,7 @@ upload_build () {
 		return 0
 	fi
 
-	csrf_token="$(grep -Eio "uploadid = '[a-z0-9]+'" "$homepage_file" | sed "s/ //g;s/'//g")"
+	csrf_token="$(grep -Eo "uploadId *= *'[A-Za-z0-9]+'" "$homepage_file" | tr -d "' ")"
 
 	if ! [[ $csrf_token =~ ^uploadId=[A-Za-z0-9]+$ ]]; then
 		echo "The CSRF token could not be determined!"
