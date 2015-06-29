@@ -88,29 +88,34 @@ upload_build_zippyshare () {
 
 upload_build_devhost () {
 	if ! curl -sLf "$homepage_url" -A "$useragent" -o "$homepage_file"; then
-		bail "Failed to retrieve homepage."
+		echo "Failed to retrieve homepage."
+		return 0
 	fi
 
 	upload_url="$(grep -Eo 'http://[a-z0-9.-]+\.d-h\.st/upload\?[A-Za-z0-9_-]+=[A-Za-z0-9]+' "$homepage_file")"
 
 	if ! [[ $upload_url =~ ^http://[a-z0-9.-]+\.d-h\.st/upload\?[A-Za-z0-9_-]+=[A-Za-z0-9]+$ ]]; then
-		bail "The upload destination could not be determined!"
+		echo "The upload destination could not be determined!"
+		return 0
 	fi
 
 	upload_id="$(echo "$upload_url" | grep -Eo '[A-Za-z0-9]+$')"
 
 	if ! [[ $upload_id =~ ^[A-Za-z0-9]+$ ]]; then
-		bail "The upload ID could not be determined!"
+		echo "The upload ID could not be determined!"
+		return 0
 	fi
 
 	if ! curl -sLf -F "UPLOAD_IDENTIFIER=$upload_id" -F "action=upload" -F "uploadfolder=0" -F "public=0" -F "user_id=0" -F "files[]=@$file" -F "file_description=" "$upload_url" -A "$useragent" -o "$response_file"; then
-		bail "Failed to upload file."
+		echo "Failed to upload file."
+		return 0
 	fi
 
 	file_url="$(grep -Eio 'http:\\/\\/d-h.st\\/[A-Za-z0-9-]+' "$response_file" | tr -d '\\')"
 
 	if ! [[ $file_url =~ ^http://d-h.st/[A-Za-z0-9-]+$ ]]; then
-		bail "The URL to which the file was uploaded could not be determined."
+		echo "The URL to which the file was uploaded could not be determined."
+		return 0
 	fi
 
 	echo "File uploaded to: $file_url"
