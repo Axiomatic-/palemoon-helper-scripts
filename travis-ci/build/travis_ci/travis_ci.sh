@@ -51,7 +51,7 @@ ac_add_options --x-libraries=/usr/lib
 	make package
 }
 
-upload_build_zippyshare () {
+upload_file_zippyshare () {
 	if ! curl -sLfc "$cookiejar" "$homepage_url" -A "$useragent" -o "$homepage_file"; then
 		echo "Failed to retrieve homepage."
 		return 0
@@ -86,7 +86,7 @@ upload_build_zippyshare () {
 	echo "File uploaded to: $file_url"
 }
 
-upload_build_devhost () {
+upload_file_devhost () {
 	if ! curl -sLf "$homepage_url" -A "$useragent" -o "$homepage_file"; then
 		echo "Failed to retrieve homepage."
 		return 0
@@ -121,7 +121,7 @@ upload_build_devhost () {
 	echo "File uploaded to: $file_url"
 }
 
-upload_build () {
+upload_file () {
 	set +e
 
 	file="$(readlink -e "$2")"
@@ -153,7 +153,7 @@ upload_build () {
 			return 0
 	esac
 
-	upload_build_$1 "$file"
+	upload_file_$1 "$file"
 }
 
 cd "$srcdir"
@@ -198,8 +198,10 @@ case "$1" in
 		install_deps
 		;;
 	build)
-		build_palemoon && upload_build zippyshare "$objdir"/dist/palemoon-*.tar.bz2
+		build_palemoon
 		;;
+	upload_build)
+		upload_file zippyshare "$objdir"/dist/palemoon-*.tar.bz2
 	*)
 		echo "Unknown job type: $1"
 		exit 2
