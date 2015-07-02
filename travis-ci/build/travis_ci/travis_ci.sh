@@ -202,6 +202,7 @@ case "$1" in
 		;;
 	upload_build)
 		upload_file zippyshare "$objdir"/dist/palemoon-*.tar.bz2
+		;;
 	*)
 		echo "Unknown job type: $1"
 		exit 2
