@@ -172,11 +172,11 @@ if [[ -z $palemoon_ci_logging ]]; then
 	# Invoke a background process with the the variable defined.
 	palemoon_ci_logging=true "$srcdir/build/travis_ci/travis_ci.sh" "$1" &> "$logfile" &
 	ps_pid=$!
-	echo -n "Started job $1"
+	echo -n "Started job $1 "
 
 	# Keep Travis-CI from killing the build process, by writing something to the screen.
 	while kill -0 $ps_pid &>/dev/null; do
-		echo -n ' .'
+		echo -n '.'
 		sleep 30
 	done
 
