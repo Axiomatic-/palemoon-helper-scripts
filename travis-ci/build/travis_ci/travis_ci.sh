@@ -41,7 +41,7 @@ ac_add_options --disable-tests
 ac_add_options --disable-mochitests
 
 ac_add_options --enable-jemalloc
-ac_add_options --enable-optimize='$optflags'
+ac_add_options --enable-optimize=\"$optflags\"
 
 ac_add_options --x-libraries=/usr/lib
 " > "$srcdir/.mozconfig"
