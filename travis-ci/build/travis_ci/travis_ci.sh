@@ -138,8 +138,8 @@ upload_file () {
 
 	cookiejar="$tmpdir/cookies.txt"
 	useragent="Mozilla/5.0 (Windows NT 6.1; rv: 31.0) Gecko/20100101 Firefox/31.0"
-	homepage_file="$tmpdir/zippyshare.homepage"
-	response_file="$tmpdir/zippyshare.response"
+	homepage_file="$tmpdir/uploadservice.homepage"
+	response_file="$tmpdir/uploadservice.response"
 
 	case "$1" in
 		zippyshare)
