@@ -54,71 +54,67 @@ ac_add_options --x-libraries=/usr/lib
 upload_file_zippyshare () {
 	if ! curl -sLfc "$cookiejar" "$homepage_url" -A "$useragent" -o "$homepage_file"; then
 		echo "Failed to retrieve homepage."
-		return 0
+		return 1
 	fi
 
 	upload_url="$(grep -Eo 'http://www[0-9]+\.zippyshare\.com/upload' "$homepage_file")"
 
 	if ! [[ $upload_url =~ ^http://www[0-9]+\.zippyshare\.com/upload$ ]]; then
 		echo "The upload destination could not be determined!"
-		return 0
+		return 1
 	fi
 
 	csrf_token="$(grep -Eo "uploadId *= *'[A-Za-z0-9]+'" "$homepage_file" | tr -d "' ")"
 
 	if ! [[ $csrf_token =~ ^uploadId=[A-Za-z0-9]+$ ]]; then
 		echo "The CSRF token could not be determined!"
-		return 0
+		return 1
 	fi
 
 	if ! curl -sLfb "$cookiejar" -F "file_upload=@$file" -F "$csrf_token" "$upload_url" -A "$useragent" -o "$response_file"; then
 		echo "Failed to upload file."
-		return 0
+		return 1
 	fi
 
 	file_url="$(grep -Eio 'http://www[0-9]+\.zippyshare\.com/.*/file\.html' "$response_file" | head -n 1)"
 
 	if ! [[ $file_url =~ ^http://www[0-9]+\.zippyshare\.com/.*/file\.html$ ]]; then
 		echo "The URL to which the file was uploaded could not be determined."
-		return 0
+		return 1
 	fi
-
-	echo "File uploaded to: $file_url"
 }
 
 upload_file_devhost () {
 	if ! curl -sLf "$homepage_url" -A "$useragent" -o "$homepage_file"; then
 		echo "Failed to retrieve homepage."
-		return 0
+		return 1
 	fi
 
 	upload_url="$(grep -Eo 'http://[a-z0-9.-]+\.d-h\.st/upload\?[A-Za-z0-9_-]+=[A-Za-z0-9]+' "$homepage_file")"
 
 	if ! [[ $upload_url =~ ^http://[a-z0-9.-]+\.d-h\.st/upload\?[A-Za-z0-9_-]+=[A-Za-z0-9]+$ ]]; then
 		echo "The upload destination could not be determined!"
-		return 0
+		return 1
 	fi
 
 	upload_id="$(echo "$upload_url" | grep -Eo '[A-Za-z0-9]+$')"
 
 	if ! [[ $upload_id =~ ^[A-Za-z0-9]+$ ]]; then
 		echo "The upload ID could not be determined!"
-		return 0
+		return 1
 	fi
 
 	if ! curl -sLf -F "UPLOAD_IDENTIFIER=$upload_id" -F "action=upload" -F "uploadfolder=0" -F "public=0" -F "user_id=0" -F "files[]=@$file" -F "file_description=" "$upload_url" -A "$useragent" -o "$response_file"; then
 		echo "Failed to upload file."
-		return 0
+		return 1
 	fi
 
 	file_url="$(grep -Eio 'http:\\/\\/d-h.st\\/[A-Za-z0-9-]+' "$response_file" | tr -d '\\')"
 
 	if ! [[ $file_url =~ ^http://d-h.st/[A-Za-z0-9-]+$ ]]; then
 		echo "The URL to which the file was uploaded could not be determined."
-		return 0
+		return 1
 	fi
-
-	echo "File uploaded to: $file_url"
 }
 
 upload_file () {
@@ -153,7 +149,9 @@ upload_file () {
 			return 0
 	esac
 
-	upload_file_$1 "$file"
+	if upload_file_$1 "$file"; then
+		echo "$file [SHA256: $(sha256sum "$file" | grep -Eo "^[a-f0-9]+")] uploaded to $file_url"
+	fi
 }
 
 cd "$srcdir"
