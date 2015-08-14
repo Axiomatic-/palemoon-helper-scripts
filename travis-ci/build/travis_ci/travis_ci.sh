@@ -3,7 +3,6 @@
 # Constants
 srcdir="$(readlink -e "$(dirname "$0")"/../..)"
 objdir="$(readlink -f "$srcdir/../pmbuild")"
-logfile="$srcdir/travis.log"
 
 install_deps () {
 	set -e
@@ -156,15 +155,22 @@ upload_file () {
 
 cd "$srcdir"
 
+if [[ -z $CONTINUOUS_INTEGRATION ]]; then
+	echo "This build is not running in a CI environment. To force the build, use CONTINUOUS_INTEGRATION=true $0"
+	exit 1
+fi
+
 if [[ -z "$1" ]]; then
 	echo "Action to be performed was not given."
 	exit 1
 fi
 
-if [[ -z $CONTINUOUS_INTEGRATION ]]; then
-	echo "This build is not running in a CI environment. To force the build, use CONTINUOUS_INTEGRATION=true $0"
+if ! [[ "$1" =~ ^(deps|build|upload_(build|logs))$ ]]; then
+	echo "Unknown job type: $1"
 	exit 1
 fi
+
+logfile="$srcdir/$1.travis.log"
 
 if [[ -z $palemoon_ci_logging ]]; then
 	# Invoke a background process with the the variable defined.
@@ -201,7 +207,9 @@ case "$1" in
 	upload_build)
 		upload_file zippyshare "$objdir"/dist/palemoon-*.tar.bz2
 		;;
-	*)
-		echo "Unknown job type: $1"
-		exit 2
+	upload_logs)
+		while read each_logfile; do
+			upload_file zippyshare "$each_logfile"
+		done < <(find "$srcdir" -maxdepth 1 -type f -name '*.travis.log')
+		;;
 esac
