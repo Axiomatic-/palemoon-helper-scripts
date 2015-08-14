@@ -22,3 +22,7 @@ To integrate the scripts with the source, open a terminal window and execute:
 	$ git push origin continuous-integration
 
 These builds (as of the present) will be built on a Ubuntu 12.04 x86-64 VM. On a successful build, these will be uploaded to Zippyshare.
+
+## Branch related information
+
+This is a demo branch to prepare for container based infrastructure as an emergency, but will not be switched to for now since all packages need to go through an approval process. Some approval requests have already been filed but have been left sitting around for quite some time.

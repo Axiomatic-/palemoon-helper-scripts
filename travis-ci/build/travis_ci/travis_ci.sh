@@ -4,14 +4,6 @@
 srcdir="$(readlink -e "$(dirname "$0")"/../..)"
 objdir="$(readlink -f "$srcdir/../pmbuild")"
 
-install_deps () {
-	set -e
-
-	sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
-	sudo apt-get update -y --force-yes
-	sudo apt-get install -y --force-yes zip unzip clang make autoconf2.13 yasm libgtk2.0-dev libglib2.0-dev libdbus-1-dev libdbus-glib-1-dev libasound2-dev libiw-dev libxt-dev mesa-common-dev libgstreamer0.10-dev libgstreamer-plugins-base0.10-dev libpulse-dev m4 flex
-}
-
 build_palemoon () {
 	set -e
 
@@ -165,7 +157,7 @@ if [[ -z "$1" ]]; then
 	exit 1
 fi
 
-if ! [[ "$1" =~ ^(deps|build|upload_(build|logs))$ ]]; then
+if ! [[ "$1" =~ ^(build|upload_(build|logs))$ ]]; then
 	echo "Unknown job type: $1"
 	exit 1
 fi
@@ -198,9 +190,6 @@ if [[ -z $palemoon_ci_logging ]]; then
 fi
 
 case "$1" in
-	deps)
-		install_deps
-		;;
 	build)
 		build_palemoon
 		;;
