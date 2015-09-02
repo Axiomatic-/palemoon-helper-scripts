@@ -9,7 +9,7 @@ At present, it provides a script for continuous integration via Travis-CI (it is
 
 ## Continuous integration with Travis-CI
 
-Integrating with Travis-CI is very easy! You need to have a Travis-CI account and have to enable Travis-CI for that repository to use this.
+Integrating with Travis-CI is very easy! You need log in to Travis-CI using your Github account and have to enable Travis-CI for that repository to use this.
 
 To integrate the scripts with the source, open a terminal window and execute:
 
