@@ -1,0 +1,46 @@
+#!/bin/bash
+
+suggest_commit_name () {
+	commit_name="$(curl -s https://hg.mozilla.org/mozilla-central/log/tip/security/manager/ssl/nsSTSPreloadList.inc | grep -Ei '<td class="age">([a-f0-9]+)<br/><i>([0-9: -]+)</i></td>' | sed -r 's!<td class="age">([a-f0-9]+)<br/><i>([0-9: -]+)</i></td>!HSTS preload update (m-c: \1, \2)!I' | head -n 1)"
+
+	if echo "$commit_name" | grep -qE '^HSTS preload update \(m-c: [a-f0-9]+, [0-9: -]+\)$'; then
+		echo "$commit_name"
+	else
+		echo "HSTS preload update (updated on $(date +%d-%m-%Y) from m-c)"
+	fi
+}
+
+if [[ ! -d .git ]]; then
+	echo "This script can only be run inside a git repository!"
+	exit 1
+fi
+
+repo_name="$(basename "$(pwd)" | tr '[:upper:]' '[:lower:]')"
+
+if [[ $repo_name != "pale-moon" ]]; then
+	echo "This script can be executed in the Pale-Moon repository only!"
+	exit 1
+fi
+
+set -ev
+
+git checkout hsts-update-work
+
+curl -sS https://hg.mozilla.org/mozilla-central/raw-file/tip/security/manager/ssl/nsSTSPreloadList.errors -o security/manager/boot/src/nsSTSPreloadList.errors
+curl -sS https://hg.mozilla.org/mozilla-central/raw-file/tip/security/manager/ssl/nsSTSPreloadList.inc -o security/manager/boot/src/nsSTSPreloadList.inc
+
+sed -ri '/^  \{ "[a-z0-9-]*", (true|false) \},$/d;s/#include <stdint.h>/#include "mozilla\/StandardInteger.h"/;s/nsSiteSecurityService\.cpp/nsStrictTransportSecurityService.cpp/' security/manager/boot/src/nsSTSPreloadList.inc
+sed -ri '/^[a-z0-9-]*:.*/d' security/manager/boot/src/nsSTSPreloadList.errors
+
+set +v
+
+[[ -z "$(git status --porcelain)" ]] && exit 0
+
+cat << EOM
+Please review changes made to the source tree with \`git diff'. Once you have
+verified the changes, you can commit them using:
+
+git add security/manager/boot/src/nsSTSPreloadList.*
+EOM
+
+echo "git commit -m \"$(suggest_commit_name)\""
