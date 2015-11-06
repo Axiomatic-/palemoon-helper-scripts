@@ -33,5 +33,3 @@ script:
   - bash build/travis_ci/travis_ci.sh build
 after_success:
   - bash build/travis_ci/travis_ci.sh upload_build
-after_script:
-  - bash build/travis_ci/travis_ci.sh upload_logs

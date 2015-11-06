@@ -3,6 +3,7 @@
 # Constants
 srcdir="$(readlink -e "$(dirname "$0")"/../..)"
 objdir="$(readlink -f "$srcdir/../pmbuild")"
+logfile="$srcdir/travis.log"
 
 build_palemoon () {
 	set -e
@@ -157,13 +158,6 @@ if [[ -z "$1" ]]; then
 	exit 1
 fi
 
-if ! [[ "$1" =~ ^(build|upload_(build|logs))$ ]]; then
-	echo "Unknown job type: $1"
-	exit 1
-fi
-
-logfile="$srcdir/$1.travis.log"
-
 if [[ -z $palemoon_ci_logging ]]; then
 	# Invoke a background process with the the variable defined.
 	palemoon_ci_logging=true "$srcdir/build/travis_ci/travis_ci.sh" "$1" &> "$logfile" &
@@ -196,9 +190,7 @@ case "$1" in
 	upload_build)
 		upload_file zippyshare "$objdir"/dist/palemoon-*.tar.bz2
 		;;
-	upload_logs)
-		while read each_logfile; do
-			upload_file zippyshare "$each_logfile"
-		done < <(find "$srcdir" -maxdepth 1 -type f -name '*.travis.log')
-		;;
+	*)
+		echo "Unknown job type: $1"
+		exit 2
 esac
