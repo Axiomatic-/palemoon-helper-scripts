@@ -4,7 +4,12 @@ _... because nothing can escape the vigilant eyes of [Axiomatic-](https://github
 
 This repository provides a set of scripts that may help Pale Moon developers and enthusiasts.
 
-At present, it provides a script for continuous integration via Travis-CI (it is an online service for running builds from each commit pushed). This repository may be expanded with other scripts in the future.
+At present, it provides the following:
+
+* Scripts and configuration files for continuous integration via Travis-CI (it is an online service for running builds from each commit pushed).
+* A script for pulling HSTS preload updates from mozilla-central.
+
+This repository may be expanded with other scripts in the future.
 
 
 ## Continuous integration with Travis-CI
