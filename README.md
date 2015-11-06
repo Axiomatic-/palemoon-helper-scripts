@@ -11,7 +11,6 @@ At present, it provides the following:
 
 This repository may be expanded with other scripts in the future.
 
-
 ## Continuous integration with Travis-CI
 
 Integrating with Travis-CI is very easy! You need log in to Travis-CI using your Github account and have to enable Travis-CI for that repository to use this.
@@ -27,3 +26,9 @@ To integrate the scripts with the source, open a terminal window and execute:
 	$ git push origin continuous-integration
 
 These builds (as of the present) will be built on a Ubuntu 12.04 x86-64 VM. On a successful build, these will be uploaded to Zippyshare.
+
+## HSTS preload updates
+
+The script in `hsts-preload-update/hsts-preload-update` pulls the latest HSTS preload lists from mozilla-central into the Pale Moon specific locations, and removes invalid rules from it. To use it, open a terminal window and execute:
+
+	$ ../hsts-preload-update/hsts-preload-update
